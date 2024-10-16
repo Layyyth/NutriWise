@@ -1,18 +1,18 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect } from "react";
 import styled from "styled-components";
 import {
   IconButton,
   ImageListItem,
   ImageListItemBar,
-  tooltipClasses,
   Typography,
 } from "@mui/material";
 import { Gauge, gaugeClasses } from "@mui/x-charts";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Stat from "../ui/Stat";
 import { predictCalories } from "../models/requests";
+import { updateNutriValue } from "../features/nutriSlice";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -112,8 +112,13 @@ const itemData = [
 
 function Dashboard() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const { user } = useSelector((store) => store.account);
-  const [neededCalories, setNeededCalories] = useState(1000);
+
+  const {
+    nutriInfo: { calories, neededCalories, protein, carbs, fat },
+  } = useSelector((store) => store.nutri);
 
   useEffect(
     function () {
@@ -122,14 +127,22 @@ function Dashboard() {
     [user.infoGathered]
   );
 
-  useEffect(function () {
-    async function init() {
-      // console.log(user.uid);
-      const { daily_calories: calories } = await predictCalories(user.uid);
-      setNeededCalories(calories);
-    }
-    init();
-  }, []);
+  useEffect(
+    function () {
+      async function init() {
+        if (neededCalories) return;
+        const { daily_calories: newNeedCalories } = await predictCalories(
+          user.uid
+        );
+        dispatch(
+          updateNutriValue({ key: "neededCalories", val: newNeedCalories })
+        );
+        // setNeededCalories(calories);
+      }
+      init();
+    },
+    [dispatch, updateNutriValue]
+  );
 
   return (
     <StyledContainer>
@@ -145,27 +158,27 @@ function Dashboard() {
               title="Protein"
               color="green"
               icon={<Icon icon="material-symbols:egg-outline" />}
-              value={400}
+              value={protein}
             />
             <Stat
               title="Carbs"
               color="yellow"
               icon={<Icon icon="lucide:wheat" />}
-              value={120}
+              value={carbs}
             />
             <Stat
               title="Fat"
               color="red"
               icon={<Icon icon="fluent-emoji-high-contrast:peanuts" />}
-              value={210}
+              value={fat}
             />
           </div>
         </div>
 
         <div className="gauge">
           <Gauge
-            value={900}
-            valueMax={neededCalories}
+            value={calories}
+            valueMax={neededCalories || 1000}
             startAngle={-91}
             endAngle={91}
             height={150}

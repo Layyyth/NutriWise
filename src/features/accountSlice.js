@@ -5,6 +5,20 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  nutriInfo: {
+    calories: 0,
+    neededCalories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+  },
+  downloadedMeals: {
+    breakfast: [],
+    lunch: [],
+    drink: [],
+    dinner: [],
+    dessert: [],
+  },
 };
 
 const accountSlice = createSlice({
@@ -29,6 +43,14 @@ const accountSlice = createSlice({
     makeAccount(state, action) {
       sendAccountToAuth(action.payload.accObj, action.payload.pass);
     },
+
+    updateNutriValue(state, action) {
+      state.nutriInfo[action.payload.key] = action.payload.val;
+    },
+
+    updateMeals(state, action) {
+      state.downloadedMeals[action.payload.key] = action.payload.val;
+    },
   },
 });
 
@@ -41,27 +63,14 @@ export function login(uid) {
 
       if (!acc) {
         dispatch({ type: "account/switchLoading", payload: false });
-        // toast.error("Something went wrong!");
         console.log("wrong");
         return;
       }
 
-      // if (acc.isDeleted) {
-      //   dispatch({ type: "account/switchLoading", payload: false });
-      //   toast.error(`${acc.displayName} is deleted`);
-      //   return;
-      // }
-
       dispatch({ type: "account/login", payload: acc });
-      // await setStatus(acc.uid, "online");
 
-      // window.addEventListener(
-      //   "beforeunload",
-      //   async () => await setStatus(acc.uid, "offline")
-      // );
       return acc;
     } catch (err) {
-      // toast.error(err.message);
       console.log(err);
     } finally {
       dispatch({ type: "account/switchLoading", payload: false });
@@ -69,7 +78,13 @@ export function login(uid) {
   };
 }
 
-export const { logout, switchLoading, makeAccount } = accountSlice.actions;
+export const {
+  logout,
+  switchLoading,
+  makeAccount,
+  updateNutriValue,
+  updateMeals,
+} = accountSlice.actions;
 
 // for the store.js:
 export default accountSlice.reducer;
