@@ -124,9 +124,9 @@ function Dashboard() {
 
   useEffect(function () {
     async function init() {
-      console.log(user.uid);
-      const data = await predictCalories(user.uid);
-      console.log(data);
+      // console.log(user.uid);
+      const { daily_calories: calories } = await predictCalories(user.uid);
+      setNeededCalories(calories);
     }
     init();
   }, []);

@@ -16,7 +16,7 @@ async function predictCalories(id) {
       },
     });
 
-    console.log(res.data);
+    // console.log(res.data);
     return res.data;
   } catch (err) {
     console.error("Error fetching calorie prediction:", err.message);
